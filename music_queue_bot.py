@@ -8,9 +8,9 @@ import logging
 import os
 from pathlib import Path
 
-import sentry_sdk
+import requests
 import validators
-from telegram import Update
+from telegram import Update, ParseMode
 from telegram.ext import CallbackContext, CommandHandler, Updater, MessageHandler, Filters
 
 sentry_sdk.init(
@@ -29,6 +29,20 @@ DATA = {}
 
 logging.basicConfig(format='%(asctime)s - %(levelname)s - %(message)s', level=logging.INFO)
 logger = logging.getLogger(__name__)
+
+
+def get_song_links(url: str):
+    answer = requests.get("https://api.song.link/v1-alpha.1/links", params={
+        'url': url,
+        'userCountry': 'RU'
+    }).json()
+    song_data = answer['entitiesByUniqueId'][next(iter(answer['entitiesByUniqueId']))]
+    out_text = f'{song_data["artistName"]} - {song_data["title"]}\n'
+    reply_urls = []
+    for platform, link in answer['linksByPlatform'].items():
+        reply_urls.append(f'<a href="{link["url"]}">{platform}</a>')
+    out_text += ' | '.join(reply_urls)
+    return out_text
 
 
 def get_data(filename: str) -> dict:
@@ -90,7 +104,10 @@ def get_object_from_queue(update: Update, _: CallbackContext) -> None:
 
     user = update.effective_user
     if DATA[str(user.id)]:
-        update.message.reply_text(DATA[str(user.id)].pop(0))
+        update.message.reply_text(
+            get_song_links(DATA[str(user.id)].pop(0)),
+            parse_mode=ParseMode.HTML
+        )
         store_data(DATA, CONFIG_FILENAME)
     else:
         update.message.reply_text('Очередь пуста.')
