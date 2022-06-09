@@ -1,0 +1,14 @@
+[Unit]
+Description = Music Queue Telegram Bot
+After = network.target
+
+[Service]
+WorkingDirectory = /home/tikhon/music-queue-bot/
+
+User = tikhon
+
+ExecStart = source bash_profile && /home/tikhon/music-queue-bot/env/bin/python music_queue_bot.py
+Restart = on-failure
+
+[Install]
+WantedBy = multi-user.target
