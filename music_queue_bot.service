@@ -6,7 +6,6 @@ After = network.target
 WorkingDirectory = /home/tikhon/music-queue-bot/
 
 User = tikhon
-ExecStartPre = ./startup.sh
 ExecStart = /home/tikhon/music-queue-bot/env/bin/python music_queue_bot.py
 Restart = on-failure
 
