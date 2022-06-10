@@ -9,6 +9,7 @@ import os
 from pathlib import Path
 
 import requests
+import sentry_sdk
 import validators
 from telegram import Update, ParseMode
 from telegram.ext import CallbackContext, CommandHandler, Updater, MessageHandler, Filters
